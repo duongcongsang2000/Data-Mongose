@@ -1,5 +1,5 @@
 {
-    "host": "http://localhost:3001/blocks",
+    "host": "http://localhost:3333/blocks",
     "port": "1234",
     "sleep": 3
 }
