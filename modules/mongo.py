@@ -16,13 +16,17 @@ class Mongo():
         self.col_seeds = self.db["seeds"]
         self.col_public_key = self.db["public_key"]
 
-    def get_all(self, collection):
-        all_seeds = list(collection.find({}))
-        return json.dumps(all_seeds, default=json_util.default)
-
-    def get_one(self, collection):
-        all_seeds = list(collection.find().sort('_id', -1).limit(1))
-        # return json.dumps(all_seeds, default=json_util.default)
+    def get_all(self, collection, filter = {}, skip = 0, limit = 0, reversed=0):
+        
+        if reversed == 0:
+            reversed_number = 1 
+        else:
+            reversed_number = -1
+        if limit == 0:
+            all_seeds = list(collection.find(filter).skip(skip).sort('_id', reversed_number))
+        else:
+            all_seeds = list(collection.find(filter).skip(skip).sort('_id', reversed_number).limit(limit))
+        # print(all_seeds)
         return json.dumps(all_seeds, default=json_util.default)
 
     def get_data(self):
@@ -41,7 +45,7 @@ class Mongo():
         # Get all hash 
         data = self.get_data()
         # Get last hash in mongodb
-        last_element =  json.loads(self.get_one(self.col_seeds))
+        last_element =  json.loads(self.get_all(self.col_seeds))
         index = 1
         try:
             print("Lasthash:", last_element[0]['lastHash'])
@@ -81,7 +85,27 @@ class Mongo():
                 }
             }
             list_result.append(result)
+            
+            # Insert public_key if not found
+            self.add_public_key(i['data'][0]['input']['address'])
 
         if len(list_result) != 0:
             self.col_seeds.insert_many(list_result)
             print(f"add {len(list_result)} to database")
+
+    def add_public_key(self, public_key):
+        try:
+            find_public_key = list(self.col_public_key.find({"public_key": public_key}).limit(1))
+
+            if len(find_public_key) == 0:
+                all_public_key = list(self.col_public_key.find())
+                
+                json_data = {
+                    "public_key": public_key,
+                    "name": "Node " + str(len(all_public_key) + 1)
+                }
+                
+                self.col_public_key.insert_one(json_data)
+                print("Insert new public_key")
+        except Exception as ex:
+            print("ERROR add public key:", ex)
