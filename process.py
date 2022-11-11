@@ -154,10 +154,11 @@ if __name__ == '__main__':
         host = data['host']
         port = data['port']
         sleep = data['sleep']
-    mongo = Mongo(host, 'localhost:27017', 'monitor')
+    mongo = Mongo(host, '165.22.254.243:27017', 'monitor')
     thread = Thread(target=run_file, args=(mongo, sleep,))
     thread.start()
-    app.run(debug=True, port=port)
+    app.run(host="0.0.0.0", port=1234)
+    # app.run(debug=True, port=port)
     # print(mongo.get_all(mongo.col_public_key))
     # print(mongo.add_public_key("tes2t"))
     # print(check_exists_publickey('046744fad37cac3aab83b4c6aa7c1605993e48b44cd7918ce959e90739a16b72e4f9d5379c3ab97bd4362b1f29dcfe5a6f225eb584fc93aa7e65962a1e6d0d2fac'))
